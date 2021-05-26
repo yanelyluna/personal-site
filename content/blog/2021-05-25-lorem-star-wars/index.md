@@ -11,8 +11,6 @@ categories:
 - Theme features
 ---
 
-{{< here >}}
-
 ## But first, a shortcode trick
 
 Courtesy of panelset.js by Garrick Aden-Buie, from his xaringanExtra package: https://pkg.garrickadenbuie.com/xaringanExtra/#/panelset
