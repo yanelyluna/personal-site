@@ -143,7 +143,7 @@ ggplot(libros, aes(x=rating)) + geom_bar(fill=colores[7]) +
 <img src="{{< blogdown/postref >}}index_files/figure-html/rating-1.png" width="672" />
 Por suerte no tengo ningún libro con calificación de 1, y al parecer hay muchos que realmente me gustaron.
 
-La calificación promedio es de NA estrellas.
+La calificación promedio es de 4.2272727 estrellas.
 
 ## ¿Qué tan diverso es mi librero?
 

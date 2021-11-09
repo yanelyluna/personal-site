@@ -101,7 +101,7 @@ ggplot(libros, aes(x=rating)) + geom_bar(fill=colores[7]) +
 ```
 Por suerte no tengo ningún libro con calificación de 1, y al parecer hay muchos que realmente me gustaron.
 
-La calificación promedio es de `r mean(libros$rating)` estrellas.
+La calificación promedio es de `r mean(libros$rating,na.rm=TRUE)` estrellas.
 
 ## ¿Qué tan diverso es mi librero?
 

@@ -7,4 +7,4 @@ headline: |
 ---
 
 <!-- this is a subheadline -->
-I'm a 22 years old studying my final semester of Actuarial Science at the Facultad de Ciencias, UNAM.
+I'm a recent graduate from Actuarial Science at the Facultad de Ciencias, UNAM. This is a place to keep all things related to working with R!
