@@ -17,7 +17,7 @@ layout: single
 
 La actividad que más disfruto hacer durante mi tiempo libre (y de soledad) es leer. Desde temprana edad descubrí mi gusto por la lectura y tenía interés en leer más cosas de lo que proporcionaban los libros en la escuela primaria. Sin embargo, en mi hogar no abundaban libros que pudieran llamar mi atención, además de un libro sobre cuentos populares ([De maravillas y encantamientos](https://www.worldcat.org/title/de-maravillas-y-encantamientos/oclc/651484510) de Marines Medero) que me resultó muy entretenido pero que ahora que lo veo en retrospectiva, probablemente no era muy adecuado para niños, aunque aún así sigue ocupando un lugar especial en mi corazón de lectora.
 
-Con el paso de los años, fui descubriendo más libros hicieron crecer mi entusiasmo por descubrir nuevas historias y personajes interesantes. Tratando de encontrar una manera de introducir mi creciente amor por la lectura, en este post hago una exploración de los libros que he ido recolectando en mi librero a lo largo de los años. 
+Con el paso de los años, fui descubriendo más libros que hicieron crecer mi entusiasmo por descubrir nuevas historias y personajes interesantes. Tratando de encontrar una manera de introducir mi creciente amor por la lectura, en este post hago una exploración de los libros que he ido recolectando en mi librero a lo largo de los años. 
 
 ## Paqueterías
 
@@ -45,22 +45,22 @@ str(libros)
 ```
 
 ```
-## tibble [130 x 15] (S3: tbl_df/tbl/data.frame)
-##  $ isb            : num [1:130] 9.79e+12 9.79e+12 9.79e+12 9.79e+12 9.79e+12 ...
-##  $ titulo         : chr [1:130] "Harry Potter y la Piedra Filosofal" "Harry Potter y la Cámara de los Secretos" "Harry Potter y el Prisionero de Azkaban" "Harry Potter y el Cáliz de Fuego" ...
-##  $ autor          : chr [1:130] "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" ...
-##  $ editorial      : chr [1:130] "Salamandra" "Salamandra" "Salamandra" "Salamandra" ...
-##  $ genero         : chr [1:130] "Fantasía" "Fantasía" "Fantasía" "Fantasía" ...
-##  $ ano_publicacion: num [1:130] 1997 1998 1999 2000 2003 ...
-##  $ pasta_dura     : num [1:130] 0 0 0 0 0 0 0 1 1 1 ...
-##  $ comprado       : num [1:130] 1 1 1 1 1 1 1 1 0 0 ...
-##  $ saga           : chr [1:130] "Harry Potter" "Harry Potter" "Harry Potter" "Harry Potter" ...
-##  $ ilustrado      : num [1:130] 0 0 0 0 0 0 0 1 0 0 ...
-##  $ idioma         : chr [1:130] "Español" "Español" "Español" "Español" ...
-##  $ leido_veces    : num [1:130] 2 2 2 1 1 1 1 1 2 2 ...
-##  $ paginas        : num [1:130] 254 292 359 635 920 569 637 119 396 487 ...
-##  $ rating         : num [1:130] 5 4 5 5 5 5 5 5 5 5 ...
-##  $ ano_compra     : num [1:130] 2017 2017 2018 2018 2019 ...
+## tibble [136 x 15] (S3: tbl_df/tbl/data.frame)
+##  $ isb            : num [1:136] 9.79e+12 9.79e+12 9.79e+12 9.79e+12 9.79e+12 ...
+##  $ titulo         : chr [1:136] "Harry Potter y la Piedra Filosofal" "Harry Potter y la Cámara de los Secretos" "Harry Potter y el Prisionero de Azkaban" "Harry Potter y el Cáliz de Fuego" ...
+##  $ autor          : chr [1:136] "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" ...
+##  $ editorial      : chr [1:136] "Salamandra" "Salamandra" "Salamandra" "Salamandra" ...
+##  $ genero         : chr [1:136] "Fantasía" "Fantasía" "Fantasía" "Fantasía" ...
+##  $ ano_publicacion: num [1:136] 1997 1998 1999 2000 2003 ...
+##  $ pasta_dura     : num [1:136] 0 0 0 0 0 0 0 1 1 1 ...
+##  $ comprado       : num [1:136] 1 1 1 1 1 1 1 1 0 0 ...
+##  $ saga           : chr [1:136] "Harry Potter" "Harry Potter" "Harry Potter" "Harry Potter" ...
+##  $ ilustrado      : num [1:136] 0 0 0 0 0 0 0 1 0 0 ...
+##  $ idioma         : chr [1:136] "Español" "Español" "Español" "Español" ...
+##  $ leido_veces    : num [1:136] 2 2 2 1 1 1 1 1 2 2 ...
+##  $ paginas        : num [1:136] 254 292 359 635 920 569 637 119 396 487 ...
+##  $ rating         : num [1:136] 5 4 5 5 5 5 5 5 5 5 ...
+##  $ ano_compra     : num [1:136] 2017 2017 2018 2018 2019 ...
 ```
 
 
@@ -87,6 +87,7 @@ ggplot(libros, aes(x=paginas)) + geom_histogram(bins = 15, fill=colores[1]) +
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/pag-1.png" width="672" />
+
 La mayoría de mis libros tienen entre 250 y 400 páginas, mientras hay alguno(s) que tienen casi 1000.
 
 
@@ -114,11 +115,24 @@ summary(libros$ano_publicacion)
 
 ```
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##    1603    1959    2006    1969    2015    2021       5
+##    1603    1959    2006    1969    2015    2021      11
 ```
 
-
 La mitad de mis libros fueron publicados antes del 2006, mientras que una cuarta parte son más recientes, ya que fueron publicados entre el 2015 y el 2021.
+
+
+```r
+ggplot(libros %>% count(ano_publicacion), aes(x=ano_publicacion,y=n)) +
+  geom_point(color=colores[3]) +
+  geom_line(color=colores[1]) +
+  theme_classic() +
+  xlab("Año de publicación") +
+  ylab("Número de libros")
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/a_publicacion-1.png" width="672" />
+
+
 
 ## ¿Me han gustado?
 
@@ -132,7 +146,7 @@ table(libros$rating)
 ```
 ## 
 ##  2  3  4  5 
-##  3 26 24 57
+##  3 26 25 58
 ```
 
 ```r
@@ -141,9 +155,10 @@ ggplot(libros, aes(x=rating)) + geom_bar(fill=colores[7]) +
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/rating-1.png" width="672" />
+
 Por suerte no tengo ningún libro con calificación de 1, y al parecer hay muchos que realmente me gustaron.
 
-La calificación promedio es de 4.2272727 estrellas.
+La calificación promedio es de 4.23 estrellas.
 
 ## ¿Qué tan diverso es mi librero?
 
@@ -164,12 +179,12 @@ gen_n
 ##  1 Fantasía/Juvenil         15
 ##  2 Autoayuda                11
 ##  3 Fantasía                  9
-##  4 Clásicos/Detectivesca     7
-##  5 Ficción                   7
-##  6 Clásicos/Romance          6
-##  7 Ficción/Contemporánea     6
+##  4 Ficción/Contemporánea     9
+##  5 Clásicos/Detectivesca     7
+##  6 Ficción                   7
+##  7 Clásicos/Romance          6
 ##  8 Niños                     6
-##  9 Ficción histórica         4
+##  9 Ficción histórica         5
 ## 10 Misterio                  4
 ## # ... with 32 more rows
 ```
@@ -193,14 +208,14 @@ gen_m
 ##  1 Fantasía/Juvenil         15
 ##  2 Autoayuda                11
 ##  3 Fantasía                  9
-##  4 Clásicos/Detectivesca     7
-##  5 Ficción                   7
-##  6 Clásicos/Romance          6
-##  7 Ficción/Contemporánea     6
+##  4 Ficción/Contemporánea     9
+##  5 Clásicos/Detectivesca     7
+##  6 Ficción                   7
+##  7 Clásicos/Romance          6
 ##  8 Niños                     6
-##  9 Ficción histórica         4
+##  9 Ficción histórica         5
 ## 10 Misterio                  4
-## 11 Otros                    55
+## 11 Otros                    57
 ```
 
 ```r
@@ -219,21 +234,31 @@ En el gráfico anterior se puede notar que hay muchas categorías que tienen poc
 # Agrupando "Fantasía"
 gen <- libros %>% mutate(gen_cat = case_when(
   genero %in% c("Fantasía/Juvenil","Fantasía","Horror/Fantasía") ~ "Fantasía",
+# Agrupando "Ficción contemporánea"
   genero %in% c("Ficción","Ficción/Contemporánea") ~ "Ficción Contemporánea",
+# Agrupando "Ficción histórica"
   genero %in% c("Ficción histórica","Novela rosa/Ficción histórica",
                 "Juvenil/FiccHist") ~ "Ficción histórica",
+# Agrupando "No ficción"
   genero %in% c("Autobiográfica","Poesía","No-ficción","Juvenil/No ficción") ~ "No ficción",
+# Agrupando "Literatura clásica"
   genero %in% c("Clásicos/Gótica","Clásicos/Aventura","Clásicos/Infantil",
                 "Clásicos/Tragedia","Clásicos/Detectivesca","Clásicos/Romance","Clásicos",
                 "Clásicos/Histórica","Clásicos/Sátira","Clásicos/Autobigráfica",
                 "Clásicos/Distópica","Clásicos/Novela corta") ~ "Literatura Clásica",
+# Agrupando "Terror y horror"
   genero %in% c("Horror/Terror psicológico","Horror/Gótica") ~ "Terror y Horror",
+# Agrupando "Aventura y misterio"
   genero %in% c("Aventuras","Misterio","Policial","Espionaje",
                 "Distópica") ~ "Aventura y Misterio",
+# Agrupando "Literatura juvenil"
   genero %in% c("Juvenil/Relatos","Juvenil","Juvenil/Fantasía",
                 "Juvenil/No ficción") ~ "Literatura Juvenil",
-  genero %in% c("Niños/Misterio","Niños","Niños/Fantasía") ~ "Para niños",
+# Agrupando "Literatura infantil"
+  genero %in% c("Niños/Misterio","Niños","Niños/Fantasía") ~ "Literatura infantil",
+# Agrupando "Otros"
   genero %in% c("Mitología","Relatos cortos","Realismo mágico","No-ficción", NA) ~ "Otros",
+# El género de Autoayuda no tuvo modificaciones.
   genero == "Autoayuda" ~ "Autoayuda"))
 
 #Número de libros por género
@@ -248,13 +273,13 @@ generos
 ##    <chr>                 <int>
 ##  1 Literatura Clásica       30
 ##  2 Fantasía                 26
-##  3 Ficción Contemporánea    13
+##  3 Ficción Contemporánea    16
 ##  4 Aventura y Misterio      12
 ##  5 Autoayuda                11
-##  6 No ficción                8
-##  7 Para niños                8
-##  8 Otros                     7
-##  9 Ficción histórica         6
+##  6 Otros                     9
+##  7 Literatura infantil       8
+##  8 No ficción                8
+##  9 Ficción histórica         7
 ## 10 Literatura Juvenil        5
 ## 11 Terror y Horror           4
 ```
@@ -294,7 +319,7 @@ ggplot(compra,aes(x=ano_compra,y=n)) +
   xlab("Año") + #xlim(2010,2021)+
   ggtitle("Número de libros comprados por año") +
   theme_classic()+
-  theme(axis.title.y=element_blank(),
+  theme(axis.title.y=element_blank(),  #Para remover los márgenes
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank(),
         axis.line.y = element_blank(),
@@ -322,7 +347,7 @@ head(autores)
 ## 6 Suzanne Collins        4
 ```
 
-En mi librero encontramos libros de 87 autores diferentes y los tres autores más populares en él son J.K. Rowling, Arthur Conan Doyle y Jane Austen. En lo personal, mi autora favorita es Jane Austen, seguida por Sally Rooney.
+En mi librero encontramos libros de 90 autores diferentes y los tres autores más populares en él son J.K. Rowling, Arthur Conan Doyle y Jane Austen. En lo personal, mi autora favorita es Jane Austen, seguida por Sally Rooney.
 
 ## Más datos
 

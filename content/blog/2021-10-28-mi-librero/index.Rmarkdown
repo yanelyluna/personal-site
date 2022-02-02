@@ -22,7 +22,7 @@ colores <- c("#65D267","#A665D2","#7A55F7","#F77A55","#F75581","#CB55F7","#5581F
 
 La actividad que más disfruto hacer durante mi tiempo libre (y de soledad) es leer. Desde temprana edad descubrí mi gusto por la lectura y tenía interés en leer más cosas de lo que proporcionaban los libros en la escuela primaria. Sin embargo, en mi hogar no abundaban libros que pudieran llamar mi atención, además de un libro sobre cuentos populares ([De maravillas y encantamientos](https://www.worldcat.org/title/de-maravillas-y-encantamientos/oclc/651484510) de Marines Medero) que me resultó muy entretenido pero que ahora que lo veo en retrospectiva, probablemente no era muy adecuado para niños, aunque aún así sigue ocupando un lugar especial en mi corazón de lectora.
 
-Con el paso de los años, fui descubriendo más libros hicieron crecer mi entusiasmo por descubrir nuevas historias y personajes interesantes. Tratando de encontrar una manera de introducir mi creciente amor por la lectura, en este post hago una exploración de los libros que he ido recolectando en mi librero a lo largo de los años. 
+Con el paso de los años, fui descubriendo más libros que hicieron crecer mi entusiasmo por descubrir nuevas historias y personajes interesantes. Tratando de encontrar una manera de introducir mi creciente amor por la lectura, en este post hago una exploración de los libros que he ido recolectando en mi librero a lo largo de los años. 
 
 ## Paqueterías
 
@@ -64,6 +64,7 @@ ggplot(libros, aes(x=paginas)) + geom_histogram(bins = 15, fill=colores[1]) +
   theme_classic() + ggtitle("Número de páginas por libro") +
   xlab("Núm. de páginas")
 ```
+
 La mayoría de mis libros tienen entre 250 y 400 páginas, mientras hay alguno(s) que tienen casi 1000.
 
 ```{r libro_grande}
@@ -83,12 +84,19 @@ libros[libros$titulo == "El arte de hacer de hacer dinero",]$ano_publicacion <- 
 ```{r ano_publicacion}
 summary(libros$ano_publicacion)
 ```
-```{r,include=FALSE,echo=FALSE}
-ggplot(libros %>% count(ano_publicacion), aes(x=ano_publicacion,y=n)) +
-  geom_point()
-```
 
 La mitad de mis libros fueron publicados antes del 2006, mientras que una cuarta parte son más recientes, ya que fueron publicados entre el 2015 y el 2021.
+
+```{r a_publicacion}
+ggplot(libros %>% count(ano_publicacion), aes(x=ano_publicacion,y=n)) +
+  geom_point(color=colores[3]) +
+  geom_line(color=colores[1]) +
+  theme_classic() +
+  xlab("Año de publicación") +
+  ylab("Número de libros")
+```
+
+
 
 ## ¿Me han gustado?
 
@@ -99,9 +107,10 @@ table(libros$rating)
 ggplot(libros, aes(x=rating)) + geom_bar(fill=colores[7]) + 
   theme_classic()
 ```
+
 Por suerte no tengo ningún libro con calificación de 1, y al parecer hay muchos que realmente me gustaron.
 
-La calificación promedio es de `r mean(libros$rating,na.rm=TRUE)` estrellas.
+La calificación promedio es de `r round(mean(libros$rating,na.rm=TRUE),2)` estrellas.
 
 ## ¿Qué tan diverso es mi librero?
 
@@ -131,21 +140,31 @@ En el gráfico anterior se puede notar que hay muchas categorías que tienen poc
 # Agrupando "Fantasía"
 gen <- libros %>% mutate(gen_cat = case_when(
   genero %in% c("Fantasía/Juvenil","Fantasía","Horror/Fantasía") ~ "Fantasía",
+# Agrupando "Ficción contemporánea"
   genero %in% c("Ficción","Ficción/Contemporánea") ~ "Ficción Contemporánea",
+# Agrupando "Ficción histórica"
   genero %in% c("Ficción histórica","Novela rosa/Ficción histórica",
                 "Juvenil/FiccHist") ~ "Ficción histórica",
+# Agrupando "No ficción"
   genero %in% c("Autobiográfica","Poesía","No-ficción","Juvenil/No ficción") ~ "No ficción",
+# Agrupando "Literatura clásica"
   genero %in% c("Clásicos/Gótica","Clásicos/Aventura","Clásicos/Infantil",
                 "Clásicos/Tragedia","Clásicos/Detectivesca","Clásicos/Romance","Clásicos",
                 "Clásicos/Histórica","Clásicos/Sátira","Clásicos/Autobigráfica",
                 "Clásicos/Distópica","Clásicos/Novela corta") ~ "Literatura Clásica",
+# Agrupando "Terror y horror"
   genero %in% c("Horror/Terror psicológico","Horror/Gótica") ~ "Terror y Horror",
+# Agrupando "Aventura y misterio"
   genero %in% c("Aventuras","Misterio","Policial","Espionaje",
                 "Distópica") ~ "Aventura y Misterio",
+# Agrupando "Literatura juvenil"
   genero %in% c("Juvenil/Relatos","Juvenil","Juvenil/Fantasía",
                 "Juvenil/No ficción") ~ "Literatura Juvenil",
-  genero %in% c("Niños/Misterio","Niños","Niños/Fantasía") ~ "Para niños",
+# Agrupando "Literatura infantil"
+  genero %in% c("Niños/Misterio","Niños","Niños/Fantasía") ~ "Literatura infantil",
+# Agrupando "Otros"
   genero %in% c("Mitología","Relatos cortos","Realismo mágico","No-ficción", NA) ~ "Otros",
+# El género de Autoayuda no tuvo modificaciones.
   genero == "Autoayuda" ~ "Autoayuda"))
 
 #Número de libros por género
@@ -192,7 +211,7 @@ ggplot(compra,aes(x=ano_compra,y=n)) +
   xlab("Año") + #xlim(2010,2021)+
   ggtitle("Número de libros comprados por año") +
   theme_classic()+
-  theme(axis.title.y=element_blank(),
+  theme(axis.title.y=element_blank(),  #Para remover los márgenes
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank(),
         axis.line.y = element_blank(),
