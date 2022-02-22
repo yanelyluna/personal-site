@@ -1,7 +1,7 @@
 ---
 title: Mi librero
 author: Yanely Luna
-date: '2021-10-28'
+date: "2021-10-28"
 slug: []
 categories: []
 tags: []
@@ -19,6 +19,8 @@ colores <- c("#65D267","#A665D2","#7A55F7","#F77A55","#F75581","#CB55F7","#5581F
              "#DCF755","#55DCF7","#F7555E","#F7EE55") 
 
 ```
+
+**Última actualización:** `r Sys.Date()`
 
 La actividad que más disfruto hacer durante mi tiempo libre (y de soledad) es leer. Desde temprana edad descubrí mi gusto por la lectura y tenía interés en leer más cosas de lo que proporcionaban los libros en la escuela primaria. Sin embargo, en mi hogar no abundaban libros que pudieran llamar mi atención, además de un libro sobre cuentos populares ([De maravillas y encantamientos](https://www.worldcat.org/title/de-maravillas-y-encantamientos/oclc/651484510) de Marines Medero) que me resultó muy entretenido pero que ahora que lo veo en retrospectiva, probablemente no era muy adecuado para niños, aunque aún así sigue ocupando un lugar especial en mi corazón de lectora.
 

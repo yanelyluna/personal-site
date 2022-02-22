@@ -1,7 +1,7 @@
 ---
 title: Mi librero
 author: Yanely Luna
-date: '2021-10-28'
+date: "2021-10-28"
 slug: []
 categories: []
 tags: []
@@ -14,6 +14,8 @@ layout: single
 
 
 
+
+**Última actualización:** 2022-02-22
 
 La actividad que más disfruto hacer durante mi tiempo libre (y de soledad) es leer. Desde temprana edad descubrí mi gusto por la lectura y tenía interés en leer más cosas de lo que proporcionaban los libros en la escuela primaria. Sin embargo, en mi hogar no abundaban libros que pudieran llamar mi atención, además de un libro sobre cuentos populares ([De maravillas y encantamientos](https://www.worldcat.org/title/de-maravillas-y-encantamientos/oclc/651484510) de Marines Medero) que me resultó muy entretenido pero que ahora que lo veo en retrospectiva, probablemente no era muy adecuado para niños, aunque aún así sigue ocupando un lugar especial en mi corazón de lectora.
 
@@ -45,22 +47,22 @@ str(libros)
 ```
 
 ```
-## tibble [136 x 15] (S3: tbl_df/tbl/data.frame)
-##  $ isb            : num [1:136] 9.79e+12 9.79e+12 9.79e+12 9.79e+12 9.79e+12 ...
-##  $ titulo         : chr [1:136] "Harry Potter y la Piedra Filosofal" "Harry Potter y la Cámara de los Secretos" "Harry Potter y el Prisionero de Azkaban" "Harry Potter y el Cáliz de Fuego" ...
-##  $ autor          : chr [1:136] "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" ...
-##  $ editorial      : chr [1:136] "Salamandra" "Salamandra" "Salamandra" "Salamandra" ...
-##  $ genero         : chr [1:136] "Fantasía" "Fantasía" "Fantasía" "Fantasía" ...
-##  $ ano_publicacion: num [1:136] 1997 1998 1999 2000 2003 ...
-##  $ pasta_dura     : num [1:136] 0 0 0 0 0 0 0 1 1 1 ...
-##  $ comprado       : num [1:136] 1 1 1 1 1 1 1 1 0 0 ...
-##  $ saga           : chr [1:136] "Harry Potter" "Harry Potter" "Harry Potter" "Harry Potter" ...
-##  $ ilustrado      : num [1:136] 0 0 0 0 0 0 0 1 0 0 ...
-##  $ idioma         : chr [1:136] "Español" "Español" "Español" "Español" ...
-##  $ leido_veces    : num [1:136] 2 2 2 1 1 1 1 1 2 2 ...
-##  $ paginas        : num [1:136] 254 292 359 635 920 569 637 119 396 487 ...
-##  $ rating         : num [1:136] 5 4 5 5 5 5 5 5 5 5 ...
-##  $ ano_compra     : num [1:136] 2017 2017 2018 2018 2019 ...
+## tibble [147 x 15] (S3: tbl_df/tbl/data.frame)
+##  $ isb            : num [1:147] 9.79e+12 9.79e+12 9.79e+12 9.79e+12 9.79e+12 ...
+##  $ titulo         : chr [1:147] "Harry Potter y la Piedra Filosofal" "Harry Potter y la Cámara de los Secretos" "Harry Potter y el Prisionero de Azkaban" "Harry Potter y el Cáliz de Fuego" ...
+##  $ autor          : chr [1:147] "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" "J.K. Rowling" ...
+##  $ editorial      : chr [1:147] "Salamandra" "Salamandra" "Salamandra" "Salamandra" ...
+##  $ genero         : chr [1:147] "Fantasía" "Fantasía" "Fantasía" "Fantasía" ...
+##  $ ano_publicacion: num [1:147] 1997 1998 1999 2000 2003 ...
+##  $ pasta_dura     : num [1:147] 0 0 0 0 0 0 0 1 1 1 ...
+##  $ comprado       : num [1:147] 1 1 1 1 1 1 1 1 0 0 ...
+##  $ saga           : chr [1:147] "Harry Potter" "Harry Potter" "Harry Potter" "Harry Potter" ...
+##  $ ilustrado      : num [1:147] 0 0 0 0 0 0 0 1 0 0 ...
+##  $ idioma         : chr [1:147] "Español" "Español" "Español" "Español" ...
+##  $ leido_veces    : num [1:147] 2 2 2 1 1 1 1 1 2 2 ...
+##  $ paginas        : num [1:147] 254 292 359 635 920 569 637 119 396 487 ...
+##  $ rating         : num [1:147] 5 4 5 5 5 5 5 5 5 5 ...
+##  $ ano_compra     : num [1:147] 2017 2017 2018 2018 2019 ...
 ```
 
 
@@ -75,7 +77,7 @@ mean(libros$paginas,na.rm=TRUE)
 ```
 
 ```
-## [1] 344.1429
+## [1] 349.1156
 ```
 
 ```r
@@ -114,8 +116,8 @@ summary(libros$ano_publicacion)
 ```
 
 ```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##    1603    1959    2006    1969    2015    2021      11
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    1603    1972    2007    1973    2015    2021
 ```
 
 La mitad de mis libros fueron publicados antes del 2006, mientras que una cuarta parte son más recientes, ya que fueron publicados entre el 2015 y el 2021.
@@ -146,7 +148,7 @@ table(libros$rating)
 ```
 ## 
 ##  2  3  4  5 
-##  3 26 25 58
+##  3 28 32 62
 ```
 
 ```r
@@ -158,7 +160,7 @@ ggplot(libros, aes(x=rating)) + geom_bar(fill=colores[7]) +
 
 Por suerte no tengo ningún libro con calificación de 1, y al parecer hay muchos que realmente me gustaron.
 
-La calificación promedio es de 4.23 estrellas.
+La calificación promedio es de 4.22 estrellas.
 
 ## ¿Qué tan diverso es mi librero?
 
@@ -177,15 +179,15 @@ gen_n
 ##    genero                    n
 ##    <chr>                 <int>
 ##  1 Fantasía/Juvenil         15
-##  2 Autoayuda                11
-##  3 Fantasía                  9
-##  4 Ficción/Contemporánea     9
-##  5 Clásicos/Detectivesca     7
-##  6 Ficción                   7
-##  7 Clásicos/Romance          6
-##  8 Niños                     6
-##  9 Ficción histórica         5
-## 10 Misterio                  4
+##  2 Ficción/Contemporánea    13
+##  3 Autoayuda                11
+##  4 Fantasía                  9
+##  5 Ficción                   9
+##  6 Niños                     8
+##  7 Clásicos/Detectivesca     7
+##  8 Clásicos/Romance          7
+##  9 Ficción histórica         6
+## 10 Autobiográfica            4
 ## # ... with 32 more rows
 ```
 
@@ -206,16 +208,16 @@ gen_m
 ##    genero                    n
 ##    <chr>                 <int>
 ##  1 Fantasía/Juvenil         15
-##  2 Autoayuda                11
-##  3 Fantasía                  9
-##  4 Ficción/Contemporánea     9
-##  5 Clásicos/Detectivesca     7
-##  6 Ficción                   7
-##  7 Clásicos/Romance          6
-##  8 Niños                     6
-##  9 Ficción histórica         5
-## 10 Misterio                  4
-## 11 Otros                    57
+##  2 Ficción/Contemporánea    13
+##  3 Autoayuda                11
+##  4 Fantasía                  9
+##  5 Ficción                   9
+##  6 Niños                     8
+##  7 Clásicos/Detectivesca     7
+##  8 Clásicos/Romance          7
+##  9 Ficción histórica         6
+## 10 Autobiográfica            4
+## 11 Otros                    58
 ```
 
 ```r
@@ -267,21 +269,22 @@ generos
 ```
 
 ```
-## # A tibble: 11 x 2
-## # Groups:   gen_cat [11]
+## # A tibble: 12 x 2
+## # Groups:   gen_cat [12]
 ##    gen_cat                   n
 ##    <chr>                 <int>
-##  1 Literatura Clásica       30
+##  1 Literatura Clásica       32
 ##  2 Fantasía                 26
-##  3 Ficción Contemporánea    16
-##  4 Aventura y Misterio      12
+##  3 Ficción Contemporánea    22
+##  4 Aventura y Misterio      13
 ##  5 Autoayuda                11
-##  6 Otros                     9
-##  7 Literatura infantil       8
-##  8 No ficción                8
-##  9 Ficción histórica         7
+##  6 Literatura infantil      10
+##  7 No ficción                9
+##  8 Ficción histórica         8
+##  9 Otros                     6
 ## 10 Literatura Juvenil        5
 ## 11 Terror y Horror           4
+## 12 <NA>                      1
 ```
 
 ```r
@@ -347,7 +350,7 @@ head(autores)
 ## 6 Suzanne Collins        4
 ```
 
-En mi librero encontramos libros de 90 autores diferentes y los tres autores más populares en él son J.K. Rowling, Arthur Conan Doyle y Jane Austen. En lo personal, mi autora favorita es Jane Austen, seguida por Sally Rooney.
+En mi librero encontramos libros de 101 autores diferentes y los tres autores más populares en él son J.K. Rowling, Arthur Conan Doyle y Jane Austen. En lo personal, mi autora favorita es Jane Austen, seguida por Sally Rooney.
 
 ## Más datos
 

@@ -1,0 +1,146 @@
+---
+title: Popular songs (Taylor's Version)
+author: Yanely Luna
+date: '2022-02-09'
+slug: []
+categories: []
+tags: []
+subtitle: ''
+excerpt: 'Exploring songs from my favorite artist in the world.'
+images: ~
+series: ~
+layout: single
+---
+
+If you have known me in real life, I think it would take you less than ten minutes to realize that I love Taylor Swift's music (and work in general) more that any other artist ever. In that case, is no surprise that I dedicated this post to analyse her discography data. I will be using a dataset from [kaggle](https://www.kaggle.com/thespacefreak/taylor-swift-spotify-data) to first do some exploration and then to try to determine the song's popularity based on its properties.
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(warning=FALSE,message = FALSE)
+colores <- c("#65D267","#A665D2","#7A55F7","#F77A55","#F75581","#CB55F7","#5581F7", #3:7 rating
+             "#DCF755","#55DCF7","#F7555E","#F7EE55") 
+```
+
+# Libraries
+
+```{r lib}
+library(dplyr) # For manipulating data
+library(ggplot2) # For graphs
+library(gridExtra) # same
+library(ggtextures) # For textured graphs
+```
+
+# Dataset
+
+```{r dataset}
+taylor <- read.csv("spotify_taylorswift.csv")
+str(taylor)
+
+```
+
+This dataset contains `r nrow(taylor)` observations from 16 variables, which according to the source represent the following:
+
++ `name`: The name of the song
++ `album`: Name of the album
++ `artist`: Name of artist/s involved
++ `release_date`: Release date of album
++ `length`: Song length in milliseconds
++ `popularity`: Percent popularity of the song based on Spotify's algorithm (posibly the number of stream at a certain period of time).
++ `danceability`: How suitable a track is for dancing based on a combination of musical elements.
++ `acousticness`: How acoustic a song is.
++ `energy`: A perceptual measure of intensity and activity. 
++ `instrumentalness`: The amount of vocals in the song.
++ `liveness`: Probability that the song was recorded with a live audience.
++ `loudness`: Tendency of music to be recorded at steadily higher volumes.
++ `speechiness`: Presence of spoken words in a track (if the speechiness of a song is above 0.66, it is probably made of spoken words, a score between 0.33 and 0.66 is a song that may contain both music and words, and a score below 0.33 means the song does not have any speech)
++ `valence`: A measure of how sad or happy the song sounds.
++ `tempo`: Beats per minute.
+
+We can drop the variable `X` since it does not give us information and look for other variables that we may not need.
+
+When we take a closer look to the _folklore_ album (or any other album) we notice that the `artist` column has only one value even when other artist participate on the song (e.g. _exile_). We check that is the case for the whole dataset, so we can drop that variable later.
+
+```{r summary}
+taylor %>% count(album)
+
+taylor %>% filter(album=="folklore (deluxe version)") %>% select(name, artist)
+
+taylor %>% count(artist)
+```
+
+We know each of the nine albums in this dataset were released on different dates so we don't need the `release_date` variable for now.
+
+```{r release_date}
+taylor %>% group_by(album) %>% count(release_date)
+
+#drop variables
+taylor <- taylor %>% select(-X,-artist,-release_date)
+
+# Just to order albums by date
+taylor$album <- ordered(taylor$album, 
+      levels = c("Taylor Swift", "Fearless (Taylor's Version)",
+                 "Speak Now (Deluxe Package)", "Red (Deluxe Edition)",
+                 "1989 (Deluxe)", "reputation", "Lover", "folklore (deluxe version)",
+                 "evermore (deluxe version)"))
+```
+
+
+Let's visualize the number of songs per album but adding some glitter :)
+
+```{r geom_textured}
+img = "https://besthqwallpapers.com/Uploads/25-5-2020/134762/thumb2-gold-glittering-background-4k-gold-glitter-texture-close-up-sparkles.jpg"
+taylor %>% 
+  ggplot(aes(x=album)) +
+  geom_textured_bar(image = img, color = "white", width = 0.8) +
+  theme_classic() +
+  ggtitle("Songs per album") + 
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+  coord_flip()
+```
+
+Now, we can start exploring the numeric variables. Firstly, the `popularity` variable has a mean of `r round(mean(taylor$popularity),2)` and we notice some songs has a value of 0. It turns out, these are tracks included in the deluxe version of _1989_ but they are not actual songs.
+
+```{r popularity}
+ggplot(taylor, aes(x=popularity)) +
+  geom_histogram(fill=colores[2],binwidth = 3) +
+  theme_classic()
+
+summary(taylor$popularity)
+
+filter(taylor, popularity==0) %>% select(name, album, popularity)
+```
+Now, let's have a quick look at the distribution of the other numeric variables.
+
+```{r num_vars, echo=FALSE}
+g1 <- ggplot(taylor, aes(x=length)) +
+  geom_histogram(fill=colores[1]) + 
+  theme_classic()
+g2 <- ggplot(taylor, aes(x=danceability)) +
+  geom_histogram(fill=colores[2]) + 
+  theme_classic()
+g3 <- ggplot(taylor, aes(x=acousticness)) +
+  geom_histogram(fill=colores[3]) + 
+  theme_classic()
+g4 <- ggplot(taylor, aes(x=energy)) +
+  geom_histogram(fill=colores[4]) + 
+  theme_classic()
+g5 <- ggplot(taylor, aes(x=instrumentalness)) +
+  geom_histogram(fill=colores[5]) + 
+  theme_classic()
+g6 <- ggplot(taylor, aes(x=liveness)) +
+  geom_histogram(fill=colores[6]) + 
+  theme_classic()
+g7 <- ggplot(taylor, aes(x=loudness)) +
+  geom_histogram(fill=colores[7]) + 
+  theme_classic()
+g8 <- ggplot(taylor, aes(x=valence)) +
+  geom_histogram(fill=colores[8]) + 
+  theme_classic()
+# g9 <- ggplot(taylor, aes(x=tempo)) +
+#   geom_histogram(fill=colores[5]) + 
+#   theme_classic()
+
+
+grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,ncol=2,nrow=4)
+```
+
