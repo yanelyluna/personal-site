@@ -12,10 +12,8 @@ layout: list-sidebar # list, list-sidebar, list-grid
 
 # for list-sidebar layout
 sidebar: 
-  title: 
-  description: Mis intereses
-  
-    Pequeños posts sobre temas que me interesa analizar con datos y visualizaciones.
+  title: Mis intereses
+  description: Pequeños posts sobre temas que me interesa analizar con datos y visualizaciones.
     
   author: "The R Markdown Team @RStudio"
   text_link_label: Subscribe via RSS
