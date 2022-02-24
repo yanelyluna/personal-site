@@ -6,13 +6,13 @@ slug: []
 categories: []
 tags: []
 subtitle: ''
-excerpt: 'Exploring songs from my favorite artist in the world.'
+excerpt: 'Exploring songs by my favorite artist in the world.'
 images: ~
 series: ~
 layout: single
 ---
 
-If you have known me in real life, I think it would take you less than ten minutes to realize that I love Taylor Swift's music (and work in general) more that any other artist ever. In that case, is no surprise that I dedicated this post to analyse her discography data. I will be using a dataset from [kaggle](https://www.kaggle.com/thespacefreak/taylor-swift-spotify-data) to first do some exploration and then to try to determine the song's popularity based on its properties.
+If you have known me in person, I think it would take you less than ten minutes to realize that I love Taylor Swift's music (and work in general) more that any music from any other artist ever. In that case, is no surprise that I dedicated this post to analyse her discography data. I will be using a dataset from [kaggle](https://www.kaggle.com/thespacefreak/taylor-swift-spotify-data) to first do some exploration and then to try to determine the song's popularity based on its properties.
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(warning=FALSE,message = FALSE)
@@ -83,32 +83,41 @@ taylor$album <- ordered(taylor$album,
                  "evermore (deluxe version)"))
 ```
 
+Now, we can start exploring the numeric variables. Firstly, the `popularity` variable has a mean of `r round(mean(taylor$popularity),2)` and we notice some songs has a value of 0. It turns out, these are tracks included in the deluxe version of _1989_ but they are not actual songs. I chose to drop these three observations.
 
-Let's visualize the number of songs per album but adding some glitter :)
+```{r popularity}
+ggplot(taylor, aes(x=popularity)) +
+  geom_histogram(fill=colores[2],binwidth = 3) +
+  theme_classic() + ggtitle("Popularity distribution")
+
+summary(taylor$popularity)
+
+filter(taylor, popularity==0) %>% select(name, album, popularity)
+
+taylor <- taylor %>% filter(popularity>0)
+
+ggplot(taylor, aes(x=popularity)) +
+  geom_histogram(fill=colores[2],binwidth = 3) +
+  theme_classic() + ggtitle("Popularity distribution (without non-songs tracks)")
+```
+
+We can compare the popularity of each album by taking the mean of its songs' popularity (and let's add some glitter).
 
 ```{r geom_textured}
-img = "https://besthqwallpapers.com/Uploads/25-5-2020/134762/thumb2-gold-glittering-background-4k-gold-glitter-texture-close-up-sparkles.jpg"
-taylor %>% 
-  ggplot(aes(x=album)) +
-  geom_textured_bar(image = img, color = "white", width = 0.8) +
+img = "https://t3.ftcdn.net/jpg/04/44/39/80/360_F_444398090_ek1YrGhZa2AZmiUZwALuMe3cRafivme9.jpg"
+taylor %>% group_by(album) %>% 
+  summarise(album_popularity=round(mean(popularity),2)) %>%
+  ggplot(aes(x=album,y=album_popularity)) +
+  geom_textured_col(image = img, color = "white", width = 0.8) +
+  geom_text(aes(label=album_popularity),size=4, nudge_y = 5) +
   theme_classic() +
-  ggtitle("Songs per album") + 
+  ggtitle("Album's Popularity") + 
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank()) +
   coord_flip()
 ```
 
-Now, we can start exploring the numeric variables. Firstly, the `popularity` variable has a mean of `r round(mean(taylor$popularity),2)` and we notice some songs has a value of 0. It turns out, these are tracks included in the deluxe version of _1989_ but they are not actual songs.
 
-```{r popularity}
-ggplot(taylor, aes(x=popularity)) +
-  geom_histogram(fill=colores[2],binwidth = 3) +
-  theme_classic()
-
-summary(taylor$popularity)
-
-filter(taylor, popularity==0) %>% select(name, album, popularity)
-```
 Now, let's have a quick look at the distribution of the other numeric variables.
 
 ```{r num_vars, echo=FALSE}

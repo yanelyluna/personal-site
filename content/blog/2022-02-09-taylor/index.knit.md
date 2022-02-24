@@ -163,34 +163,16 @@ taylor$album <- ordered(taylor$album,
                  "evermore (deluxe version)"))
 ```
 
-
-Let's visualize the number of songs per album but adding some glitter :)
-
-
-```r
-img = "https://besthqwallpapers.com/Uploads/25-5-2020/134762/thumb2-gold-glittering-background-4k-gold-glitter-texture-close-up-sparkles.jpg"
-taylor %>% 
-  ggplot(aes(x=album)) +
-  geom_textured_bar(image = img, color = "white", width = 0.8) +
-  theme_classic() +
-  ggtitle("Songs per album") + 
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank()) +
-  coord_flip()
-```
-
-<img src="{{< blogdown/postref >}}index_files/figure-html/geom_textured-1.png" width="672" />
-
-Now, we can start exploring the numeric variables. Firstly, the `popularity` variable has a mean of 61.23 and we notice some songs has a value of 0. It turns out, these are tracks included in the deluxe version of _1989_ but they are not actual songs.
+Now, we can start exploring the numeric variables. Firstly, the `popularity` variable has a mean of 61.23 and we notice some songs has a value of 0. It turns out, these are tracks included in the deluxe version of _1989_ but they are not actual songs. I chose to drop these three observations.
 
 
 ```r
 ggplot(taylor, aes(x=popularity)) +
   geom_histogram(fill=colores[2],binwidth = 3) +
-  theme_classic()
+  theme_classic() + ggtitle("Popularity distribution")
 ```
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/popularity-1.png" width="672" />
+<img src="index_files/figure-html/popularity-1.png" width="672" />
 
 ```r
 summary(taylor$popularity)
@@ -211,7 +193,20 @@ filter(taylor, popularity==0) %>% select(name, album, popularity)
 ## 2 I Wish You Would - Voice Memo 1989 (Deluxe)          0
 ## 3      Blank Space - Voice Memo 1989 (Deluxe)          0
 ```
-Now, let's have a quick look at the distribution of the other numeric variables.
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/num_vars-1.png" width="672" />
+```r
+taylor <- taylor %>% filter(popularity>0)
+
+ggplot(taylor, aes(x=popularity)) +
+  geom_histogram(fill=colores[2],binwidth = 3) +
+  theme_classic() + ggtitle("Popularity distribution (without non-songs tracks)")
+```
+
+<img src="index_files/figure-html/popularity-2.png" width="672" />
+
+We can compare the popularity of each album by taking the mean of its songs' popularity (and let's add some glitter).
+
+
+
+
 
