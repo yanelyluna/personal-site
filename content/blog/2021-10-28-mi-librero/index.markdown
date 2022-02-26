@@ -15,7 +15,7 @@ layout: single
 
 
 
-**Última actualización:** 2022-02-22
+**Última actualización:** 2022-02-25
 
 La actividad que más disfruto hacer durante mi tiempo libre (y de soledad) es leer. Desde temprana edad descubrí mi gusto por la lectura y tenía interés en leer más cosas de lo que proporcionaban los libros en la escuela primaria. Sin embargo, en mi hogar no abundaban libros que pudieran llamar mi atención, además de un libro sobre cuentos populares ([De maravillas y encantamientos](https://www.worldcat.org/title/de-maravillas-y-encantamientos/oclc/651484510) de Marines Medero) que me resultó muy entretenido pero que ahora que lo veo en retrospectiva, probablemente no era muy adecuado para niños, aunque aún así sigue ocupando un lugar especial en mi corazón de lectora.
 
@@ -25,11 +25,12 @@ Con el paso de los años, fui descubriendo más libros que hicieron crecer mi en
 
 
 ```r
-library(readxl)
-library(ggplot2)
-library(gridExtra)
-library(dplyr)
-library(janitor)
+library(readxl) # Para leer el archivo
+library(ggplot2) # Gráficas
+library(gridExtra) # También para gráficas
+library(dplyr) # Manejar data.frames
+library(janitor) # Limpieza de datos
+library(knitr) # Presentar tablas
 ```
 
 ## Datos
@@ -82,7 +83,6 @@ mean(libros$paginas,na.rm=TRUE)
 
 ```r
 # Histograma
-#hist(libros$paginas, main = "Número de páginas por libro",xlab = "Núm. de páginas")
 ggplot(libros, aes(x=paginas)) + geom_histogram(bins = 15, fill=colores[1]) +
   theme_classic() + ggtitle("Número de páginas por libro") +
   xlab("Núm. de páginas")
@@ -93,16 +93,6 @@ ggplot(libros, aes(x=paginas)) + geom_histogram(bins = 15, fill=colores[1]) +
 La mayoría de mis libros tienen entre 250 y 400 páginas, mientras hay alguno(s) que tienen casi 1000.
 
 
-```r
-libros %>% filter(paginas==max(libros$paginas,na.rm = T)) %>% select(titulo, autor, editorial, paginas)
-```
-
-```
-## # A tibble: 1 x 4
-##   titulo                            autor        editorial  paginas
-##   <chr>                             <chr>        <chr>        <dbl>
-## 1 Harry Potter y la Orden del Fénix J.K. Rowling Salamandra     920
-```
 
 Harry Potter y la Orden del Fénix de J.K. Rowling de la editorial Salamandra es el libro con mayor número de páginas (920) en mi librero.
 
@@ -120,7 +110,7 @@ summary(libros$ano_publicacion)
 ##    1603    1972    2007    1973    2015    2021
 ```
 
-La mitad de mis libros fueron publicados antes del 2006, mientras que una cuarta parte son más recientes, ya que fueron publicados entre el 2015 y el 2021.
+La mitad de mis libros fueron publicados antes del 2007, mientras que una cuarta parte son más recientes, ya que fueron publicados entre el 2015 y el 2021.
 
 
 ```r
@@ -142,23 +132,15 @@ El sistema que uso para registrar qué tanto me ha gustado un libro es otorgarle
 
 
 ```r
-table(libros$rating)
-```
-
-```
-## 
-##  2  3  4  5 
-##  3 28 32 62
-```
-
-```r
-ggplot(libros, aes(x=rating)) + geom_bar(fill=colores[7]) + 
-  theme_classic()
+libros %>% group_by(rating) %>% summarise(n=n()) %>%
+ggplot(aes(x=rating,y=n)) + geom_col(fill=colores[7]) + 
+  theme_classic() +
+  geom_label(aes(label=n),color=colores[7])
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/rating-1.png" width="672" />
 
-Por suerte no tengo ningún libro con calificación de 1, y al parecer hay muchos que realmente me gustaron.
+Por suerte no tengo ningún libro con calificación de 1, y la mayoría realmente me gustaron. Puedo decir que con el tiempo, y mientras más leo he podido definir lo que me gusta y lo que no. Pongo más atención en elegir mis lecturas y en consecuencia la mayoría las disfruto.
 
 La calificación promedio es de 4.22 estrellas.
 
@@ -170,55 +152,45 @@ En cuanto a géneros, siempre he considerado que cuento con una colección basta
 ```r
 #Número de libros por género
 gen_n <- libros %>% select(genero) %>% group_by(genero) %>% count() %>% arrange(desc(n))
-gen_n
+
+head(gen_n) %>% kable(col.names = c("Género", "Núm. libros"))
 ```
 
-```
-## # A tibble: 42 x 2
-## # Groups:   genero [42]
-##    genero                    n
-##    <chr>                 <int>
-##  1 Fantasía/Juvenil         15
-##  2 Ficción/Contemporánea    13
-##  3 Autoayuda                11
-##  4 Fantasía                  9
-##  5 Ficción                   9
-##  6 Niños                     8
-##  7 Clásicos/Detectivesca     7
-##  8 Clásicos/Romance          7
-##  9 Ficción histórica         6
-## 10 Autobiográfica            4
-## # ... with 32 more rows
-```
+
+
+|Género                | Núm. libros|
+|:---------------------|-----------:|
+|Fantasía/Juvenil      |          15|
+|Ficción/Contemporánea |          13|
+|Autoayuda             |          11|
+|Fantasía              |           9|
+|Ficción               |           9|
+|Niños                 |           8|
 
 ```r
-#ggplot(libros,aes(x=genero)) + geom_bar()
-
 #Agrupando géneros poco representados
 otros <- sum(gen_n$n[11:length(gen_n$genero)])
 gen_m <- gen_n[1:11,]
 gen_m[11,1] <- "Otros"
 gen_m[11,2] <- otros
-gen_m
+kable(gen_m, col.names = c("Género", "Núm. libros"))
 ```
 
-```
-## # A tibble: 11 x 2
-## # Groups:   genero [11]
-##    genero                    n
-##    <chr>                 <int>
-##  1 Fantasía/Juvenil         15
-##  2 Ficción/Contemporánea    13
-##  3 Autoayuda                11
-##  4 Fantasía                  9
-##  5 Ficción                   9
-##  6 Niños                     8
-##  7 Clásicos/Detectivesca     7
-##  8 Clásicos/Romance          7
-##  9 Ficción histórica         6
-## 10 Autobiográfica            4
-## 11 Otros                    58
-```
+
+
+|Género                | Núm. libros|
+|:---------------------|-----------:|
+|Fantasía/Juvenil      |          15|
+|Ficción/Contemporánea |          13|
+|Autoayuda             |          11|
+|Fantasía              |           9|
+|Ficción               |           9|
+|Niños                 |           8|
+|Clásicos/Detectivesca |           7|
+|Clásicos/Romance      |           7|
+|Ficción histórica     |           6|
+|Autobiográfica        |           4|
+|Otros                 |          58|
 
 ```r
 # Gráfica de géneros
@@ -232,7 +204,6 @@ En el gráfico anterior se puede notar que hay muchas categorías que tienen poc
 
 ```r
 #Reagrupando los géneros
-# gen_n$genero
 # Agrupando "Fantasía"
 gen <- libros %>% mutate(gen_cat = case_when(
   genero %in% c("Fantasía/Juvenil","Fantasía","Horror/Fantasía") ~ "Fantasía",
@@ -255,7 +226,7 @@ gen <- libros %>% mutate(gen_cat = case_when(
                 "Distópica") ~ "Aventura y Misterio",
 # Agrupando "Literatura juvenil"
   genero %in% c("Juvenil/Relatos","Juvenil","Juvenil/Fantasía",
-                "Juvenil/No ficción") ~ "Literatura Juvenil",
+                "Juvenil/No ficción", "Juvenil/Romance") ~ "Literatura Juvenil",
 # Agrupando "Literatura infantil"
   genero %in% c("Niños/Misterio","Niños","Niños/Fantasía") ~ "Literatura infantil",
 # Agrupando "Otros"
@@ -265,27 +236,16 @@ gen <- libros %>% mutate(gen_cat = case_when(
 
 #Número de libros por género
 generos <- gen %>% group_by(gen_cat) %>% count() %>% arrange(desc(n))
-generos
+head(generos, n=3) %>% kable(col.names = c("Género", "Núm. libros"))
 ```
 
-```
-## # A tibble: 12 x 2
-## # Groups:   gen_cat [12]
-##    gen_cat                   n
-##    <chr>                 <int>
-##  1 Literatura Clásica       32
-##  2 Fantasía                 26
-##  3 Ficción Contemporánea    22
-##  4 Aventura y Misterio      13
-##  5 Autoayuda                11
-##  6 Literatura infantil      10
-##  7 No ficción                9
-##  8 Ficción histórica         8
-##  9 Otros                     6
-## 10 Literatura Juvenil        5
-## 11 Terror y Horror           4
-## 12 <NA>                      1
-```
+
+
+|Género                | Núm. libros|
+|:---------------------|-----------:|
+|Literatura Clásica    |          32|
+|Fantasía              |          26|
+|Ficción Contemporánea |          22|
 
 ```r
 # Gráfica de géneros reagrupados
@@ -294,15 +254,21 @@ pie(generos$n, labels = generos$gen_cat, col = colores)
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/gen_cat-1.png" width="672" />
 
+En el gráfico anterior podemos ver que los libros de literatura clásica, de fantasía y de ficción contemporánea conforman más de la mitad de los libros que tengo. La literatura clásica y la ficción contemporánea son sin duda mis géneros favoritos, pero la fantasía no es un género por el que me incline mucho, por lo que puedo decir que los libros de esta categoría son más aportaciones de mis hermanas y hermano que mías.
+
+
+
 
 
 Ahora quiero explorar qué tanto me ha gustado cada género.
 
+
 ```r
-gen_rat <- gen %>% filter(is.na(rating) == F) %>% group_by(gen_cat,rating) %>% count()
+# Agrupar por rating (solo los libros que he leído)
+gen %>% filter(is.na(rating) == F) %>% group_by(gen_cat,rating) %>% count() %>%
 
-
-ggplot(gen_rat, aes(x=gen_cat, y=n, fill=factor(rating))) + 
+# Gráfica de barras por género y rating
+ggplot(aes(x=gen_cat, y=n, fill=factor(rating))) + 
   geom_bar(position="stack",stat="identity") + 
   theme_classic() +
   theme(axis.text.x = element_text(angle = 40, hjust = 1)) +
@@ -311,15 +277,19 @@ ggplot(gen_rat, aes(x=gen_cat, y=n, fill=factor(rating))) +
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/gen_rat-1.png" width="672" />
 
+Podemos notar que aunque disfruto la mayoría de los libros de literatura clásica que leo (una gran parte tiene 5 estrellas) también he tenido algunas decepciones en ese género pues hay alguno al que le di solo 2 estrellas. Por otra parte, los pocos libros que he leído de terror y/u horror me han gustado mucho (4 y 5 estrellas) por lo que tal vez me lleve una buena sorpresa si exploro más en ese género.
+
 ## ¿En qué año compré más libros?
 
 
 ```r
-compra <- libros%>%count(ano_compra)
-ggplot(compra,aes(x=ano_compra,y=n)) +
+# Agrupar por año de compra
+libros%>% count(ano_compra) %>% 
+# Gráfica de barras por año
+ggplot(aes(x=ano_compra,y=n)) +
   geom_bar(stat = "identity",fill=colores[5]) +
-  geom_label(label=compra$n,color=colores[5]) +
-  xlab("Año") + #xlim(2010,2021)+
+  geom_label(aes(label=n),color=colores[5]) +
+  xlab("Año") +
   ggtitle("Número de libros comprados por año") +
   theme_classic()+
   theme(axis.title.y=element_blank(),  #Para remover los márgenes
@@ -327,28 +297,32 @@ ggplot(compra,aes(x=ano_compra,y=n)) +
         axis.ticks.y=element_blank(),
         axis.line.y = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(breaks=c(2010:2021),label=as.character(2010:2021))
+  scale_x_continuous(breaks=c(2010:2022),label=as.character(2010:2022))
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/ano_compra-1.png" width="672" />
+
+Durante el 2020 aumentó considerablemente el número de libros comprados. Puedo decir que el comienzo de la pandemia es la causa de este incremento, debido a que tenía más tiempo libre para leer y mis gastos para entretenimiento fueron todos para adquirir nuevas lecturas. 
+
 ## Autores favoritos
 
 ```r
-autores <- count(libros,autor) %>% arrange(desc(n))
-head(autores)
+autores <- count(libros,autor) %>% arrange(desc(n)) 
+
+head(autores) %>%
+kable(col.names = c("Autor/a", "Núm. libros"))
 ```
 
-```
-## # A tibble: 6 x 2
-##   autor                  n
-##   <chr>              <int>
-## 1 J.K. Rowling           8
-## 2 Arthur Conan Doyle     7
-## 3 Jane Austen            6
-## 4 Becca Fitzpatrick      4
-## 5 Stephen King           4
-## 6 Suzanne Collins        4
-```
+
+
+|Autor/a            | Núm. libros|
+|:------------------|-----------:|
+|J.K. Rowling       |           8|
+|Arthur Conan Doyle |           7|
+|Jane Austen        |           6|
+|Becca Fitzpatrick  |           4|
+|Stephen King       |           4|
+|Suzanne Collins    |           4|
 
 En mi librero encontramos libros de 101 autores diferentes y los tres autores más populares en él son J.K. Rowling, Arthur Conan Doyle y Jane Austen. En lo personal, mi autora favorita es Jane Austen, seguida por Sally Rooney.
 

@@ -13,7 +13,7 @@ layout: single
 ---
 
 
-```{r settings, echo=FALSE}
+```{r setup, echo=FALSE}
 knitr::opts_chunk$set(warning=FALSE,message = FALSE)
 colores <- c("#65D267","#A665D2","#7A55F7","#F77A55","#F75581","#CB55F7","#5581F7", #3:7 rating
              "#DCF755","#55DCF7","#F7555E","#F7EE55") 
@@ -29,11 +29,12 @@ Con el paso de los años, fui descubriendo más libros que hicieron crecer mi en
 ## Paqueterías
 
 ```{r packages}
-library(readxl)
-library(ggplot2)
-library(gridExtra)
-library(dplyr)
-library(janitor)
+library(readxl) # Para leer el archivo
+library(ggplot2) # Gráficas
+library(gridExtra) # También para gráficas
+library(dplyr) # Manejar data.frames
+library(janitor) # Limpieza de datos
+library(knitr) # Presentar tablas
 ```
 
 ## Datos
@@ -61,7 +62,6 @@ La longitud (número de páginas) de un libro puede ser, para algunos lectores, 
 mean(libros$paginas,na.rm=TRUE)
 
 # Histograma
-#hist(libros$paginas, main = "Número de páginas por libro",xlab = "Núm. de páginas")
 ggplot(libros, aes(x=paginas)) + geom_histogram(bins = 15, fill=colores[1]) +
   theme_classic() + ggtitle("Número de páginas por libro") +
   xlab("Núm. de páginas")
@@ -69,7 +69,7 @@ ggplot(libros, aes(x=paginas)) + geom_histogram(bins = 15, fill=colores[1]) +
 
 La mayoría de mis libros tienen entre 250 y 400 páginas, mientras hay alguno(s) que tienen casi 1000.
 
-```{r libro_grande}
+```{r libro_grande, echo=FALSE, include=FALSE}
 libros %>% filter(paginas==max(libros$paginas,na.rm = T)) %>% select(titulo, autor, editorial, paginas)
 ```
 
@@ -77,7 +77,6 @@ libros %>% filter(paginas==max(libros$paginas,na.rm = T)) %>% select(titulo, aut
 
 ## Libros viejitos o nuevos
 ```{r, include=FALSE,echo=FALSE}
-#summary(libros$ano_publicacion)
 # Correción del año de publicación de "El arte de hacer de hacer dinero"
 libros[libros$titulo == "El arte de hacer de hacer dinero",]$ano_publicacion <- 2018
 ```
@@ -87,7 +86,7 @@ libros[libros$titulo == "El arte de hacer de hacer dinero",]$ano_publicacion <- 
 summary(libros$ano_publicacion)
 ```
 
-La mitad de mis libros fueron publicados antes del 2006, mientras que una cuarta parte son más recientes, ya que fueron publicados entre el 2015 y el 2021.
+La mitad de mis libros fueron publicados antes del 2007, mientras que una cuarta parte son más recientes, ya que fueron publicados entre el 2015 y el 2021.
 
 ```{r a_publicacion}
 ggplot(libros %>% count(ano_publicacion), aes(x=ano_publicacion,y=n)) +
@@ -105,12 +104,13 @@ ggplot(libros %>% count(ano_publicacion), aes(x=ano_publicacion,y=n)) +
 El sistema que uso para registrar qué tanto me ha gustado un libro es otorgarle entre 1 y 5 estrellas, donde 5 quiere decir que me gustó mucho el libro y 1 que básicamente desearía no haberlo leído.
 
 ```{r rating}
-table(libros$rating)
-ggplot(libros, aes(x=rating)) + geom_bar(fill=colores[7]) + 
-  theme_classic()
+libros %>% group_by(rating) %>% summarise(n=n()) %>%
+ggplot(aes(x=rating,y=n)) + geom_col(fill=colores[7]) + 
+  theme_classic() +
+  geom_label(aes(label=n),color=colores[7])
 ```
 
-Por suerte no tengo ningún libro con calificación de 1, y al parecer hay muchos que realmente me gustaron.
+Por suerte no tengo ningún libro con calificación de 1, y la mayoría realmente me gustaron. Puedo decir que con el tiempo, y mientras más leo he podido definir lo que me gusta y lo que no. Pongo más atención en elegir mis lecturas y en consecuencia la mayoría las disfruto.
 
 La calificación promedio es de `r round(mean(libros$rating,na.rm=TRUE),2)` estrellas.
 
@@ -121,15 +121,15 @@ En cuanto a géneros, siempre he considerado que cuento con una colección basta
 ```{r gen_n}
 #Número de libros por género
 gen_n <- libros %>% select(genero) %>% group_by(genero) %>% count() %>% arrange(desc(n))
-gen_n
-#ggplot(libros,aes(x=genero)) + geom_bar()
+
+head(gen_n) %>% kable(col.names = c("Género", "Núm. libros"))
 
 #Agrupando géneros poco representados
 otros <- sum(gen_n$n[11:length(gen_n$genero)])
 gen_m <- gen_n[1:11,]
 gen_m[11,1] <- "Otros"
 gen_m[11,2] <- otros
-gen_m
+kable(gen_m, col.names = c("Género", "Núm. libros"))
 # Gráfica de géneros
 pie(gen_m$n, labels = gen_m$genero)
 ```
@@ -138,7 +138,6 @@ En el gráfico anterior se puede notar que hay muchas categorías que tienen poc
 
 ```{r gen_cat}
 #Reagrupando los géneros
-# gen_n$genero
 # Agrupando "Fantasía"
 gen <- libros %>% mutate(gen_cat = case_when(
   genero %in% c("Fantasía/Juvenil","Fantasía","Horror/Fantasía") ~ "Fantasía",
@@ -161,7 +160,7 @@ gen <- libros %>% mutate(gen_cat = case_when(
                 "Distópica") ~ "Aventura y Misterio",
 # Agrupando "Literatura juvenil"
   genero %in% c("Juvenil/Relatos","Juvenil","Juvenil/Fantasía",
-                "Juvenil/No ficción") ~ "Literatura Juvenil",
+                "Juvenil/No ficción", "Juvenil/Romance") ~ "Literatura Juvenil",
 # Agrupando "Literatura infantil"
   genero %in% c("Niños/Misterio","Niños","Niños/Fantasía") ~ "Literatura infantil",
 # Agrupando "Otros"
@@ -171,17 +170,22 @@ gen <- libros %>% mutate(gen_cat = case_when(
 
 #Número de libros por género
 generos <- gen %>% group_by(gen_cat) %>% count() %>% arrange(desc(n))
-generos
+head(generos, n=3) %>% kable(col.names = c("Género", "Núm. libros"))
 
 # Gráfica de géneros reagrupados
 pie(generos$n, labels = generos$gen_cat, col = colores)
 ```
-```{r, include=FALSE,echo=FALSE}
-generos <- generos %>% arrange(desc(gen_cat)) %>%
-  mutate(prop = n / sum(generos$n) *100) %>%
-  mutate(ypos = cumsum(prop))
 
-ggplot(generos, aes(x="",y=prop, fill=gen_cat)) + 
+En el gráfico anterior podemos ver que los libros de literatura clásica, de fantasía y de ficción contemporánea conforman más de la mitad de los libros que tengo. La literatura clásica y la ficción contemporánea son sin duda mis géneros favoritos, pero la fantasía no es un género por el que me incline mucho, por lo que puedo decir que los libros de esta categoría son más aportaciones de mis hermanas y hermano que mías.
+
+
+```{r, include=FALSE,echo=FALSE}
+# Intento de gráfica pie con ggplot
+generos %>% arrange(desc(gen_cat)) %>%
+  mutate(prop = n / sum(generos$n) *100) %>%
+  mutate(ypos = cumsum(prop)) %>%
+
+ggplot(aes(x="",y=prop, fill=gen_cat)) + 
   geom_bar(stat="identity", width=1, color="white") + 
   coord_polar("y", start=0) +
   theme_void() +
@@ -191,11 +195,13 @@ ggplot(generos, aes(x="",y=prop, fill=gen_cat)) +
 
 
 Ahora quiero explorar qué tanto me ha gustado cada género.
+
 ```{r gen_rat}
-gen_rat <- gen %>% filter(is.na(rating) == F) %>% group_by(gen_cat,rating) %>% count()
+# Agrupar por rating (solo los libros que he leído)
+gen %>% filter(is.na(rating) == F) %>% group_by(gen_cat,rating) %>% count() %>%
 
-
-ggplot(gen_rat, aes(x=gen_cat, y=n, fill=factor(rating))) + 
+# Gráfica de barras por género y rating
+ggplot(aes(x=gen_cat, y=n, fill=factor(rating))) + 
   geom_bar(position="stack",stat="identity") + 
   theme_classic() +
   theme(axis.text.x = element_text(angle = 40, hjust = 1)) +
@@ -203,14 +209,18 @@ ggplot(gen_rat, aes(x=gen_cat, y=n, fill=factor(rating))) +
 
 ```
 
+Podemos notar que aunque disfruto la mayoría de los libros de literatura clásica que leo (una gran parte tiene 5 estrellas) también he tenido algunas decepciones en ese género pues hay alguno al que le di solo 2 estrellas. Por otra parte, los pocos libros que he leído de terror y/u horror me han gustado mucho (4 y 5 estrellas) por lo que tal vez me lleve una buena sorpresa si exploro más en ese género.
+
 ## ¿En qué año compré más libros?
 
 ```{r, ano_compra}
-compra <- libros%>%count(ano_compra)
-ggplot(compra,aes(x=ano_compra,y=n)) +
+# Agrupar por año de compra
+libros%>% count(ano_compra) %>% 
+# Gráfica de barras por año
+ggplot(aes(x=ano_compra,y=n)) +
   geom_bar(stat = "identity",fill=colores[5]) +
-  geom_label(label=compra$n,color=colores[5]) +
-  xlab("Año") + #xlim(2010,2021)+
+  geom_label(aes(label=n),color=colores[5]) +
+  xlab("Año") +
   ggtitle("Número de libros comprados por año") +
   theme_classic()+
   theme(axis.title.y=element_blank(),  #Para remover los márgenes
@@ -218,12 +228,17 @@ ggplot(compra,aes(x=ano_compra,y=n)) +
         axis.ticks.y=element_blank(),
         axis.line.y = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(breaks=c(2010:2021),label=as.character(2010:2021))
+  scale_x_continuous(breaks=c(2010:2022),label=as.character(2010:2022))
 ```
+
+Durante el 2020 aumentó considerablemente el número de libros comprados. Puedo decir que el comienzo de la pandemia es la causa de este incremento, debido a que tenía más tiempo libre para leer y mis gastos para entretenimiento fueron todos para adquirir nuevas lecturas. 
+
 ## Autores favoritos
 ```{r autores}
-autores <- count(libros,autor) %>% arrange(desc(n))
-head(autores)
+autores <- count(libros,autor) %>% arrange(desc(n)) 
+
+head(autores) %>%
+kable(col.names = c("Autor/a", "Núm. libros"))
 
 ```
 
