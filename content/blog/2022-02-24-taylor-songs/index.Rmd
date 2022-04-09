@@ -24,6 +24,7 @@ colores <- c("#65D267","#A665D2","#7A55F7","#F77A55","#F75581","#CB55F7","#5581F
 
 ```{r lib}
 library(dplyr) # For manipulating data
+library(tidyr) # same
 library(ggplot2) # For graphs
 library(gridExtra) # same
 library(ggtextures) # For textured graphs
@@ -75,13 +76,19 @@ taylor %>% group_by(album) %>% count(release_date)
 #drop variables
 taylor <- taylor %>% select(-X,-artist,-release_date)
 
-# Just to order albums by date
-taylor$album <- ordered(taylor$album, 
-      levels = c("Taylor Swift", "Fearless (Taylor's Version)",
-                 "Speak Now (Deluxe Package)", "Red (Deluxe Edition)",
-                 "1989 (Deluxe)", "reputation", "Lover", "folklore (deluxe version)",
-                 "evermore (deluxe version)"))
+# Change the album names to be shorter and rearrange them according to realse date.
+taylor$album <- recode_factor(taylor$album, "Taylor Swift"="Debut",
+                              "Fearless (Taylor's Version)" = "FearlessTV",
+                              "Speak Now (Deluxe Package)" = "Speak Now",
+                              "Red (Deluxe Edition)" = "Red",
+                              "1989 (Deluxe)" = "1989",
+                              "reputation"="reputation",
+                              "Lover"="Lover",
+                              "folklore (deluxe version)" = "folklore",
+                              "evermore (deluxe version)"="evermore")
 ```
+
+# Exploratory Data Analysis
 
 Now, we can start exploring the numeric variables. Firstly, the `popularity` variable has a mean of `r round(mean(taylor$popularity),2)` and we notice some songs has a value of 0. It turns out, these are tracks included in the deluxe version of _1989_ but they are not actual songs. I chose to drop these three observations.
 
@@ -117,39 +124,87 @@ taylor %>% group_by(album) %>%
   coord_flip()
 ```
 
-
 Now, let's have a quick look at the distribution of the other numeric variables.
 
-```{r num_vars, echo=FALSE}
-g1 <- ggplot(taylor, aes(x=length)) +
-  geom_histogram(fill=colores[1]) + 
-  theme_classic()
-g2 <- ggplot(taylor, aes(x=danceability)) +
-  geom_histogram(fill=colores[2]) + 
-  theme_classic()
-g3 <- ggplot(taylor, aes(x=acousticness)) +
-  geom_histogram(fill=colores[3]) + 
-  theme_classic()
-g4 <- ggplot(taylor, aes(x=energy)) +
-  geom_histogram(fill=colores[4]) + 
-  theme_classic()
-g5 <- ggplot(taylor, aes(x=instrumentalness)) +
-  geom_histogram(fill=colores[5]) + 
-  theme_classic()
-g6 <- ggplot(taylor, aes(x=liveness)) +
-  geom_histogram(fill=colores[6]) + 
-  theme_classic()
-g7 <- ggplot(taylor, aes(x=loudness)) +
-  geom_histogram(fill=colores[7]) + 
-  theme_classic()
-g8 <- ggplot(taylor, aes(x=valence)) +
-  geom_histogram(fill=colores[8]) + 
-  theme_classic()
-# g9 <- ggplot(taylor, aes(x=tempo)) +
-#   geom_histogram(fill=colores[5]) + 
-#   theme_classic()
+```{r tay_long}
+tay_long <- taylor %>%
+  select(popularity,length, instrumentalness, danceability,acousticness,energy,liveness,loudness,
+         speechiness,valence, tempo) %>% 
+  pivot_longer(cols = length:tempo)
 
+ggplot(tay_long, aes(x=value)) +
+  geom_histogram(aes(fill=name)) +
+  facet_wrap(~name, scales = "free") +
+  theme_classic() + 
+  theme(legend.position = "none") +
+  scale_fill_manual(values = colores)
+```
 
-grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,ncol=2,nrow=4)
+Let's take a closer look at `instrumentalness` since it seems most of its values are zero.
+
+```{r instr}
+summary(taylor$acousticness)
+
+ggplot(taylor, aes(instrumentalness, popularity)) +
+  geom_point(color=colores[5]) +
+  theme_classic()
+```
+We can see that the values of `instrumentalness` are very close to zero and the variable doesn't seem to influence our response (`popularity`) so we decide to drop it.
+
+Now we explore the correlation between the remaining continuous variables. We notice that `energy` and `loudness` have the strongest positive correlation of all pairs of variables; meanwhile, `loudness` and `acousticness` have the strongest negative correlation. This could be an indicative of collinearity problems for a regression model. 
+
+```{r cor}
+library(corrplot)
+cont_vars <- c(3:7,9:13)
+taylor_cont_vars <- taylor[,cont_vars]
+
+cor_m <- cor(taylor_cont_vars)
+corrplot(cor_m, method = 'shade', order = 'AOE', type = "lower")
+```
+
+Let's look at the other continuous variables compared with `popularity`. These scatter plots give us an idea of how much does a certain variable influences the response variable. We notice that `loudness` and `length` seem to have a negative relation with `popularity`; meanwhile, `speechiness` and `danceability` seem to have a positive one.
+
+```{r pairs}
+tay_long <- filter(tay_long, name!= "instrumentalness") #%>% 
+  #mutate(value = ifelse(name=="length",format(value, scientific = TRUE), value))
+
+ggplot(tay_long, aes(x=value, y=popularity)) +
+  geom_point(aes(color=name)) +
+  geom_smooth(method="lm", se=FALSE) +
+  facet_wrap(~name, scales = "free") +
+  theme_classic() + 
+  theme(legend.position = "none",
+        axis.text.x = element_text(size=7)) +
+  scale_fill_manual(values = colores)
+
+```
+
+# Modeling
+
+We can start by fitting a multiple linear regression model with all continuos variables.
+
+```{r rlm}
+mod_rlm1 <- lm(popularity~., data = taylor_cont_vars)
+summary(mod_rlm1)
+
+step_mod1 <- step(mod_rlm1, direction = "both")
+
+mod2 <- lm(popularity ~ length + acousticness + loudness + 
+    speechiness, data = taylor_cont_vars)
+
+summary(mod2)
+
+```
+
+```{r}
+mod_rlm2 <- lm(popularity~., data = select(taylor,-name,-instrumentalness))
+summary(mod_rlm2)
+
+step(mod_rlm2, direction = "both")
+
+mod4 <- lm(popularity ~ album + liveness + loudness + valence + tempo, data = taylor)
+
+summary(mod4)
+
 ```
 

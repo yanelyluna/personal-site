@@ -21,6 +21,7 @@ If you have known me in person, I think it would take you less than ten minutes 
 
 ```r
 library(dplyr) # For manipulating data
+library(tidyr) # same
 library(ggplot2) # For graphs
 library(gridExtra) # same
 library(ggtextures) # For textured graphs
@@ -155,13 +156,19 @@ taylor %>% group_by(album) %>% count(release_date)
 #drop variables
 taylor <- taylor %>% select(-X,-artist,-release_date)
 
-# Just to order albums by date
-taylor$album <- ordered(taylor$album, 
-      levels = c("Taylor Swift", "Fearless (Taylor's Version)",
-                 "Speak Now (Deluxe Package)", "Red (Deluxe Edition)",
-                 "1989 (Deluxe)", "reputation", "Lover", "folklore (deluxe version)",
-                 "evermore (deluxe version)"))
+# Change the album names to be shorter and rearrange them according to realse date.
+taylor$album <- recode_factor(taylor$album, "Taylor Swift"="Debut",
+                              "Fearless (Taylor's Version)" = "FearlessTV",
+                              "Speak Now (Deluxe Package)" = "Speak Now",
+                              "Red (Deluxe Edition)" = "Red",
+                              "1989 (Deluxe)" = "1989",
+                              "reputation"="reputation",
+                              "Lover"="Lover",
+                              "folklore (deluxe version)" = "folklore",
+                              "evermore (deluxe version)"="evermore")
 ```
+
+# Exploratory Data Analysis
 
 Now, we can start exploring the numeric variables. Firstly, the `popularity` variable has a mean of 61.23 and we notice some songs has a value of 0. It turns out, these are tracks included in the deluxe version of _1989_ but they are not actual songs. I chose to drop these three observations.
 
@@ -188,10 +195,10 @@ filter(taylor, popularity==0) %>% select(name, album, popularity)
 ```
 
 ```
-##                            name         album popularity
-## 1    I Know Places - Voice Memo 1989 (Deluxe)          0
-## 2 I Wish You Would - Voice Memo 1989 (Deluxe)          0
-## 3      Blank Space - Voice Memo 1989 (Deluxe)          0
+##                            name album popularity
+## 1    I Know Places - Voice Memo  1989          0
+## 2 I Wish You Would - Voice Memo  1989          0
+## 3      Blank Space - Voice Memo  1989          0
 ```
 
 ```r
@@ -223,8 +230,158 @@ taylor %>% group_by(album) %>%
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/geom_textured-1.png" width="672" />
 
-
 Now, let's have a quick look at the distribution of the other numeric variables.
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/num_vars-1.png" width="672" />
+
+```r
+tay_long <- taylor %>%
+  select(popularity,length, instrumentalness, danceability,acousticness,energy,liveness,loudness,
+         speechiness,valence, tempo) %>% 
+  pivot_longer(cols = length:tempo)
+
+ggplot(tay_long, aes(x=value)) +
+  geom_histogram(aes(fill=name)) +
+  facet_wrap(~name, scales = "free") +
+  theme_classic() + 
+  theme(legend.position = "none") +
+  scale_fill_manual(values = colores)
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/tay_long-1.png" width="672" />
+
+Let's take a closer look at `instrumentalness` since it seems most of its values are zero.
+
+
+```r
+summary(taylor$acousticness)
+```
+
+```
+##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## 0.000191 0.027975 0.142000 0.313407 0.661000 0.971000
+```
+
+```r
+ggplot(taylor, aes(instrumentalness, popularity)) +
+  geom_point(color=colores[5]) +
+  theme_classic()
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/instr-1.png" width="672" />
+We can see that the values of `instrumentalness` are very close to zero and the variable doesn't seem to influence our response (`popularity`) so we decide to drop it.
+
+Now we explore the correlation between the remaining continuous variables. We notice that `energy` and `loudness` have the strongest positive correlation of all pairs of variables; meanwhile, `loudness` and `acousticness` have the strongest negative correlation. This could be an indicative of collinearity problems for a regression model. 
+
+
+```r
+library(corrplot)
+cont_vars <- c(3:7,9:13)
+taylor_cont_vars <- taylor[,cont_vars]
+
+cor_m <- cor(taylor_cont_vars)
+corrplot(cor_m, method = 'shade', order = 'AOE', type = "lower")
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/cor-1.png" width="672" />
+
+Let's look at the other continuous variables compared with `popularity`. These scatter plots give us an idea of how much does a certain variable influences the response variable. We notice that `loudness` and `length` seem to have a negative relation with `popularity`; meanwhile, `speechiness` and `danceability` seem to have a positive one.
+
+
+```r
+tay_long <- filter(tay_long, name!= "instrumentalness") #%>% 
+  #mutate(value = ifelse(name=="length",format(value, scientific = TRUE), value))
+
+ggplot(tay_long, aes(x=value, y=popularity)) +
+  geom_point(aes(color=name)) +
+  geom_smooth(method="lm", se=FALSE) +
+  facet_wrap(~name, scales = "free") +
+  theme_classic() + 
+  theme(legend.position = "none",
+        axis.text.x = element_text(size=7)) +
+  scale_fill_manual(values = colores)
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/pairs-1.png" width="672" />
+
+# Modeling
+
+We can start by fitting a multiple linear regression model with all continuos variables.
+
+
+```r
+mod_rlm1 <- lm(popularity~., data = taylor_cont_vars)
+summary(mod_rlm1)
+```
+
+```
+## 
+## Call:
+## lm(formula = popularity ~ ., data = taylor_cont_vars)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -16.7974  -5.2335   0.3421   4.8021  18.3626 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)   5.415e+01  9.054e+00   5.981 1.43e-08 ***
+## length       -4.344e-05  1.778e-05  -2.444   0.0156 *  
+## danceability  7.404e+00  6.022e+00   1.230   0.2207    
+## acousticness -6.882e+00  2.943e+00  -2.339   0.0206 *  
+## energy        9.084e+00  6.104e+00   1.488   0.1387    
+## liveness     -9.601e+00  8.197e+00  -1.171   0.2432    
+## loudness     -1.863e+00  4.212e-01  -4.422 1.81e-05 ***
+## speechiness   2.707e+01  1.229e+01   2.203   0.0291 *  
+## valence      -2.028e+00  4.277e+00  -0.474   0.6361    
+## tempo        -1.313e-02  1.993e-02  -0.659   0.5111    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 7.658 on 158 degrees of freedom
+## Multiple R-squared:  0.2672,	Adjusted R-squared:  0.2255 
+## F-statistic: 6.402 on 9 and 158 DF,  p-value: 9.961e-08
+```
+
+
+```r
+mod_rlm2 <- lm(popularity~., data = select(taylor,-name,-instrumentalness))
+summary(mod_rlm2)
+```
+
+```
+## 
+## Call:
+## lm(formula = popularity ~ ., data = select(taylor, -name, -instrumentalness))
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -8.6685 -2.3496 -0.5954  1.9373 15.6737 
+## 
+## Coefficients:
+##                   Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)      5.531e+01  5.306e+00  10.424  < 2e-16 ***
+## albumFearlessTV  1.600e+01  1.499e+00  10.673  < 2e-16 ***
+## albumSpeak Now  -7.444e-01  1.653e+00  -0.450   0.6531    
+## albumRed         1.067e+01  1.708e+00   6.246 4.13e-09 ***
+## album1989        1.528e+01  1.710e+00   8.936 1.37e-15 ***
+## albumreputation  2.381e+01  1.924e+00  12.373  < 2e-16 ***
+## albumLover       2.332e+01  1.772e+00  13.160  < 2e-16 ***
+## albumfolklore    1.546e+01  1.902e+00   8.130 1.49e-13 ***
+## albumevermore    1.788e+01  1.971e+00   9.068 6.27e-16 ***
+## length           1.025e-05  1.218e-05   0.841   0.4017    
+## danceability    -3.370e+00  3.761e+00  -0.896   0.3716    
+## acousticness    -2.055e+00  2.099e+00  -0.979   0.3290    
+## energy          -2.887e+00  3.672e+00  -0.786   0.4330    
+## liveness        -5.707e+00  4.725e+00  -1.208   0.2291    
+## loudness         5.116e-01  3.025e-01   1.692   0.0928 .  
+## speechiness      1.505e+00  7.539e+00   0.200   0.8420    
+## valence          5.436e+00  2.698e+00   2.015   0.0457 *  
+## tempo           -1.797e-02  1.148e-02  -1.565   0.1196    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 4.341 on 150 degrees of freedom
+## Multiple R-squared:  0.7764,	Adjusted R-squared:  0.7511 
+## F-statistic: 30.64 on 17 and 150 DF,  p-value: < 2.2e-16
+```
 
